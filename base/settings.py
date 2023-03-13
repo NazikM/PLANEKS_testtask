@@ -79,9 +79,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'my_db',
-        'USER': 'NazaMaru',
+        'USER': 'debian-sys-maint',
         'PASSWORD': 'LQysAIIpZwmarQH4',
-        'HOST': 'NazaMaru.mysql.pythonanywhere-services.com',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
