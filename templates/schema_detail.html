@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-start">
+        <h2>{{ schema.name }} schema</h2>
+        <a href="{% url 'schema_update' schema.pk %}" class="btn text-primary">Edit schema</a>
+    </div>
+    <table class="table table-bordered mt-3">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Column name</th>
+          <th scope="col">Column type</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for column in schema.columns %}
+        <tr>
+          <th scope="row">{{ forloop.counter }}</th>
+          <td>{{ column|get_item:'name' }}</td>
+          <td>{{ column|get_item:'type' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <div class="mt-5 d-flex justify-content-between">
+        <h2>Data sets</h2>
+        <form id='generate_form' class="d-flex justify-content-between align-items-center">
+            {% csrf_token %}
+            <label class='form-label m-2' for="rows">Rows:</label>
+            <input class='form-control m-2' style='max-width: 84px' type="text" id="rows" name="rows">
+            <button type="submit" class="btn btn-success m-2">Generate data</button>
+        </form>
+    </div>
+    <table class="table table-bordered mt-3">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Created</th>
+          <th scope="col">Status</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="datasets">
+      {% for dataset in datasets %}
+        <tr>
+          <th scope="row">{{ forloop.counter }}</th>
+          <td>{{ dataset.date_created|date:"Y-m-d" }}</td>
+            {% if dataset.status == "R" %}
+                <td><span class ="p-2 rounded text-white bg-success">Ready</span></td>
+                <td><a href="{{ dataset.csv_file.url }}" class="text-primary">Download</a></td>
+            {% else %}
+                <td><span class ="p-2 rounded text-white bg-secondary">Processing</span></td>
+                <td></td>
+            {% endif %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <script>
+        let lastID = {{ datasets|length }};
+        let date = (new Date()).toISOString().split('T')[0];
+        console.log(lastID);
+        $("#generate_form").submit(function (e) {
+            e.preventDefault();
+            let serializedData = $(this).serialize();
+            let current = lastID;
+            $('#datasets').append(`
+            <tr>
+              <th scope="row">${++lastID}</th>
+              <td>${date}</td>
+              <td id="dataset_status_${current}"><span class ="p-2 rounded text-white bg-secondary">Processing</span></td>
+              <td id="dataset_action_${current}"></td>
+            </tr>`)
+            let dataset_status = $(`#dataset_status_${current}`);
+            let dataset_action = $(`#dataset_action_${current}`);
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'generate_dataset' schema.id %}",
+                data: serializedData,
+                success: function(response){
+                    dataset_status.empty();
+                    dataset_status.append(`<span class="p-2 rounded text-white bg-success">Ready</span>`);
+                    dataset_action.empty();
+                    dataset_action.append(`<a href="${response.url}" class="text-primary">Download</a>`);
+                    console.log(response.url)
+                },
+                error: function (response){
+                    console.log("Error", response);
+                }
+            })
+        });
+    </script>
+{% endblock %}

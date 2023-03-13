@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between mt-3">
+    <h1 style="font-size: 24px">Data schemas</h1>
+  <a href="{% url 'schema_create' %}" class="btn btn-success" style="background-color: #5CB85C; border-color: #5CB85C">New Schema</a>
+    </div>
+
+  <table class="table table-bordered mt-3">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Title</th>
+        <th>Modified</th>
+        <th>Created</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for schema in schemas %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td><a href="{% url 'generate_dataset' pk=schema.id %}">{{ schema.name }}</a></td>
+          <td>{{ schema.date_modified }}</td>
+          <td>{{ schema.date_created }}</td>
+          <td>
+              <a href="{% url 'schema_update' schema.pk %}" class="btn text-primary">Edit scheme</a>
+              <a onclick="deleteSchema({% url 'schema_detail' schema.pk %})" class="btn text-danger">Delete</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="4">No schemas yet.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+    <script>
+        function deleteSchema(url) {
+          // Ask the user for confirmation before deleting the schema
+          if (!confirm("Are you sure you want to delete this schema?")) {
+            return;
+          }
+
+          // Send the delete request to the server
+          fetch(url, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': getCookie('csrftoken'), // Get the CSRF token from the cookie
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => {
+            if (response.ok) {
+              // Redirect to the schema list page on successful deletion
+              window.location.replace('/'); // Change this URL if your schema list page has a different URL
+            } else {
+              throw new Error('Failed to delete schema');
+            }
+          })
+          .catch(error => {
+            console.error(error);
+            alert('Failed to delete schema');
+          });
+        }
+
+        function getCookie(name) {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+    </script>
+{% endblock %}

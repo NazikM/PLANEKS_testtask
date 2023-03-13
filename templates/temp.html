@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">{{ form.title }}</div>
+        <div class="card-body">
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="{{ form.name.id_for_label }}">Name:</label>
+              {{ form.name }}
+            </div>
+            <div class="form-group">
+              <label for="{{ form.separator.id_for_label }}">Separator:</label>
+              {{ form.separator }}
+            </div>
+            <div class="form-group">
+              <label for="{{ form.string_character.id_for_label }}">String Character:</label>
+              {{ form.string_character }}
+            </div>
+            <div class="form-group">
+              <label for="{{ form.columns.id_for_label }}">Columns:</label>
+              {{ form.columns }}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

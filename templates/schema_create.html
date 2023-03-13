@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between mt-3">
+      <h1 style="font-size: 24px">New schema</h1>
+    </div>
+    <form method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-6 order-md-last">
+            <button type="submit" class="btn btn-primary float-end">Submit</button>
+        </div>
+        <div class="col-6">
+            <div class="mb-3">
+                <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
+                {{ form.name }}
+            </div>
+            <div class="mb-3">
+                <label for="{{ form.separator.id_for_label }}" class="form-label">Comma separator</label>
+                {{ form.separator }}
+            </div>
+            <div class="mb-3">
+                <label for="{{ form.string_character.id_for_label }}" class="form-label">String character</label>
+                {{ form.string_character }}
+            </div>
+        </div>
+    </div>
+    <h2>Schema columns</h2>
+    <div id="columns"></div>
+    </form>
+    <div class="new-column mt-5 border p-3">
+        <form id="new_column_form">
+        <div class="row" id="new-column">
+            <div class="col-4">
+                <label for="new_column_name" class="form-label">Column name</label>
+                <input type="text" class="form-control" id="new_column_name">
+            </div>
+            <div class="col-3">
+                <label for="new_column_type" class="form-label">Type</label>
+                <select class="form-select" onchange="check_type(0)" id="new_column_type">
+                    <option value="name">Full name</option>
+                    <option value="int">Integer</option>
+                    <option value="company">Company</option>
+                    <option value="job">Job</option>
+                    <option value="email">Email</option>
+                    <option value="domain">Domain</option>
+                    <option value="phone">Phone</option>
+                    <option value="text">Text</option>
+                    <option value="address">Address</option>
+                    <option value="date">Date</option>
+                </select>
+            </div>
+            <div class="col-2" id="new_column_range">
+
+            </div>
+            <div class="col-2">
+                <label for="new_column_order" class="form-label">Order</label>
+                <input type="text" class="form-control" id="new_column_order">
+            </div>
+            <div class="col-1 align-self-end">
+                <a class="btn text-danger" href="#">Delete</a>
+            </div>
+        </div>
+        <a class="btn btn-primary mt-3" onclick="add_column()">Add column</a>
+        </form>
+    </div>
+
+    <script>
+        let counter = 1;
+        let rangeTypes = new Set(["int", "text"]);
+        let columns_ids = new Set([]);
+        let rangeHTMLCode = `<div class="row">
+                <div class="col-6">
+                    <label for="new_column_range_from" class="form-label">From</label>
+                    <input type="number" class="form-control" id="new_column_range_from">
+                </div>
+                <div class="col-6">
+                    <label for="new_column_range_to" class="form-label">To</label>
+                    <input type="number" class="form-control" id="new_column_range_to">
+                </div>
+            </div>`;
+        function check_type(id){
+            let value, range;
+            console.log(id);
+            if (id === 0){
+                value = $("#new_column_type").val();
+                range = $("#new_column_range");
+            }else{
+                value = $(`#column_${id}_type`).val();
+                range = $(`#column_${id}_range`);
+            }
+
+            if (rangeTypes.has(value)){
+                range.append(rangeHTMLCode);
+            }else{
+                range.empty();
+            }
+        }
+
+        function add_column(){
+            let new_column = $('#new-column');
+            let new_column_name = new_column.find("#new_column_name").val();
+            let new_column_type = new_column.find("#new_column_type").val();
+            let new_column_range_from = new_column.find("#new_column_range_from").val();
+            let new_column_range_to = new_column.find("#new_column_range_to").val();
+            let new_column_order = new_column.find("#new_column_order").val();
+            new_column = `<div class="row mt-3" id="column_${counter}"><div class="col-4">
+                <label for="column_${counter}_name" class="form-label">Name</label>
+                <input type="text" class="form-control" value="${new_column_name}" name="column_${counter}_name" id="column_${counter}_name">
+            </div>
+            <div class="col-3">
+                <label for="column_${counter}_type" class="form-label">Type</label>
+                <select class="form-select" onchange="check_type(${counter})" name="column_${counter}_type" id="column_${counter}_type">
+                    <option value="name">Full name</option>
+                    <option value="int">Integer</option>
+                    <option value="company">Company</option>
+                </select>
+            </div>
+            <div class="col-2" id="column_${counter}_range">`
+            if (rangeTypes.has(new_column_type)){
+                new_column += `<div class="row">
+                <div class="col-6">
+                    <label for="new_column_range_from" class="form-label">From</label>
+                    <input type="number" class="form-control" value="${new_column_range_from}" name="column_${counter}_range_from" id="column_${counter}_range_from">
+                </div>
+                <div class="col-6">
+                    <label for="new_column_range_to" class="form-label">To</label>
+                    <input type="number" class="form-control"  value="${new_column_range_to}" name="column_${counter}_range_to" id="column_${counter}_range_to">
+                </div>
+            </div>`
+            }
+            new_column += `</div>
+            <div class="col-2">
+                <label for="column_${counter}_order" class="form-label">Order</label>
+                <input type="text" value="${new_column_order}" class="form-control" name="column_${counter}_order" id="column_${counter}_order">
+            </div>
+            <div class="col-1 align-self-end">
+                <button type="button" class="btn text-danger" onclick="remove_column(${counter})">Delete</button>
+            </div></div>`
+            let columns = $('#columns')
+            columns.append(new_column);
+            $(`#column_${counter}_type`).val(new_column_type);
+            document.getElementById("new_column_form").reset();
+            columns_ids.add(counter);
+            counter++;
+        }
+        function remove_column(id){
+            $(`#column_${id}`).remove();
+            columns_ids.delete(id);
+        }
+    </script>
+{% endblock %}

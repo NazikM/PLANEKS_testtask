@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <title>{% block title %}My Website{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+
+      <nav class="navbar navbar-light bg-light">
+          <div class="container d-flex justify-content-between">
+            <div class="d-flex justify-content-between align-items-center">
+                <a class="navbar-brand" href="{% url 'schema_list' %}" style="font-size: 20px">FakeCSV</a>
+                <a class="nav-link" href="{% url 'schema_list' %}" style="font-size: 16px">Schemas</a>
+            </div>
+              <span>Hello, {{ user.get_username }} <a href="{% url 'signout' %}">Logout</a></span>
+        </div>
+      </nav>
+      <div class="container mx-auto mt-3">
+          {% block content %}
+          {% endblock %}
+      </div>
+      </body>
+</html>
